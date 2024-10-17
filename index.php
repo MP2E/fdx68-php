@@ -9,7 +9,7 @@ header( 'Cache-Control: post-check=0, pre-check=0', FALSE );
 // HTTP/1.0
 header( 'Pragma: no-cache' );
 
-define("IMAGE_PATH", "/home/pi/fdximg/");
+define("IMAGE_PATH", "/home/www-data/images/");
 define("PROCESS_PATH", "/usr/local/bin/");
 define("PROCESS_NAME1", "fddctl");
 define("PROCESS_NAME2", "fddemu");
@@ -52,7 +52,7 @@ if(isset($_GET['reload'])){
     if($param[0] === 'file') {
         // ファイルinsert
         $path = $param[2];
-        $command = PROCESS_PATH.PROCESS_NAME1.' -i '.$param[1].' -c insert '.$param[2].$param[3];
+        $command = PROCESS_PATH.PROCESS_NAME1.' -i '.$param[1].' -c insert '.escapeshellarg($param[2].$param[3]);
         $output = array();
         $ret = null;
         exec($command, $output, $ret);
@@ -69,7 +69,7 @@ if(isset($_GET['reload'])){
     } else if($param[0] === 'conv') {
         // ファイルconvert
         $path = $param[2];
-        $command = PROCESS_PATH.PROCESS_NAME3.' -i '.$param[2].$param[3].' -o '.$param[2].$param[3].'.FDX';
+        $command = PROCESS_PATH.PROCESS_NAME3.' -i '.escapeshellarg($param[2].$param[3]).' -o '.escapeshellarg($param[2].$param[3]).'.FDX';
         $output = array();
         $ret = null;
         exec($command, $output, $ret);
@@ -93,23 +93,23 @@ if(isset($_GET['reload'])){
     infoOut();
 
     // 画面自動更新
-    echo '<p><div>画面自動更新</div>';
+    echo '<p><div>Automatic Refresh</div>';
     autoReload();
 
     // FDD操作
-    echo '<p><div>Fddエジェクト</div>';
+    echo '<p><div>Fdd Eject</div>';
     fddOut($path);
 
     // データ表示
-    echo '<p><div>Image操作</div>';
+    echo '<p><div>Insert Image</div>';
     dataOut($path, $fddType);
 
     // 起動/停止
-    echo '<p><div>FDX68 起動/停止</div>';
+    echo '<p><div>FDX68 Start/Stop</div>';
     fdx68StartStop();
 
     // 再起動/電源断
-    echo '<p><div>Raspberry Pi 再起動/電源断</div>';
+    echo '<p><div>Raspberry Pi Restart/Power Off</div>';
     raspiRebootShut();
 
 }
@@ -118,12 +118,12 @@ if(isset($_GET['reload'])){
 function infoOut() {
     echo '<div id="info">';
     // プロセス確認
-    echo '<p><div>プロセス状況:';
+    echo '<p><div>Process Status: ';
     $result = exec("ps -aef | grep ".PROCESS_NAME2." | grep -v grep", $output);
     if(empty($output)) {
-        echo '停止中</div>';
+        echo 'Stopped</div>';
     } else {
-        echo '起動中</div>';
+        echo 'Running</div>';
         $command = PROCESS_PATH.PROCESS_NAME1.' -l';
         $output = array();
         $ret = null;
@@ -138,7 +138,7 @@ function infoOut() {
 // 画面自動更新
 function autoReload() {
     // 画面自動更新
-    echo '<input id="chk" type="checkbox" value="画面自動更新" onclick="';
+    echo '<input id="chk" type="checkbox" value="Automatic Refresh" onclick="';
     echo 'var self = this;';
     echo 'function reload() {';
     echo '  var req = new XMLHttpRequest();';
@@ -173,7 +173,7 @@ function fddOut() {
 
     // FDD?エジェクト
     echo '<td>';
-    echo '<input type="button" value="排出" onclick="';
+    echo '<input type="button" value="Eject" onclick="';
     echo 'var req = new XMLHttpRequest();';
     echo 'req.onreadystatechange = function(){';
     echo '  if(req.readyState == 4){';
@@ -261,7 +261,7 @@ function dataOut($path, $fddType) {
             echo '</td>';
 
             echo '<td>';
-            echo '<input type="button" value="挿入" onclick="';
+            echo '<input type="button" value="Insert" onclick="';
             echo 'var req = new XMLHttpRequest();';
             echo 'req.onreadystatechange = function(){';
             echo '  if(req.readyState == 4){';
@@ -283,7 +283,7 @@ function dataOut($path, $fddType) {
         foreach ($array_file2 as $file) {
             echo '<tr>';
             echo '<td>';
-            echo '<input type="button" value="変換" onclick="';
+            echo '<input type="button" value="Convert" onclick="';
             echo 'var req = new XMLHttpRequest();';
             echo 'req.onreadystatechange = function(){';
             echo '  if(req.readyState == 4){';
@@ -311,7 +311,7 @@ function dataOut($path, $fddType) {
 // 起動/停止
 function fdx68StartStop() {
     // 起動
-    echo '<input type="button" value="起動" onclick="';
+    echo '<input type="button" value="Start" onclick="';
     echo 'var req = new XMLHttpRequest();';
     echo 'req.onreadystatechange = function(){';
     echo '  if(req.readyState == 4){';
@@ -323,7 +323,7 @@ function fdx68StartStop() {
     echo 'req.open(\'GET\',\'index.php?start=0\',true);';
     echo 'req.send(null);"/>';
     // 停止
-    echo '<input type="button" value="停止" onclick="';
+    echo '<input type="button" value="Stop" onclick="';
     echo 'var req = new XMLHttpRequest();';
     echo 'req.onreadystatechange = function(){';
     echo '  if(req.readyState == 4){';
@@ -339,7 +339,7 @@ function fdx68StartStop() {
 // 再起動/電源断
 function raspiRebootShut() {
     // 再起動
-    echo '<input type="button" value="再起動" onclick="';
+    echo '<input type="button" value="Restart" onclick="';
     echo 'var req = new XMLHttpRequest();';
     echo 'req.onreadystatechange = function(){';
     echo '  if(req.readyState == 4){';
@@ -351,7 +351,7 @@ function raspiRebootShut() {
     echo 'req.open(\'GET\',\'index.php?reboot=0\',true);';
     echo 'req.send(null);"/>';
     // 電源断
-    echo '<input type="button" value="電源断" onclick="';
+    echo '<input type="button" value="Power Off" onclick="';
     echo 'var req = new XMLHttpRequest();';
     echo 'req.onreadystatechange = function(){';
     echo '  if(req.readyState == 4){';
